@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <div id="app">
+      <h1>Hello Vue!</h1>
+      <p>This is a simple Vue.js application.</p>
+      <p>插值语法{{ message }}</p>
+      <script src="./dist/vue.js"></script>
+      <script>
+        // Vue.js 是响应式框架
+        // Vue.js 是 MVVM 框架 MVVM是 Model View ViewModel 数据影响视图，视图影响数据
+        console.log(Vue);
+        const vm = new Vue({
+          el: "#app",
+          data() {
+            return {
+              message: "Hello Vue!",
+            };
+          },
+        });
+        console.log(vm._data);
+      </script>
+    </div>
+  </body>
+</html>

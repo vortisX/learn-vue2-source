@@ -1,0 +1,3 @@
+{
+    "presets": ["@babel/preset-env"] // 预解析 ES6+代码
+}
