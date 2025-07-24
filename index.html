@@ -10,22 +10,26 @@
       <h1>Hello Vue!</h1>
       <p>This is a simple Vue.js application.</p>
       <p>插值语法{{ message }}</p>
-      <script src="./dist/vue.js"></script>
-      <script>
-        // Vue.js 是响应式框架
-        // Vue.js 是 MVVM 框架 MVVM是 Model View ViewModel 数据影响视图，视图影响数据
-        console.log(Vue);
-        const vm = new Vue({
-          el: "#app",
-          data() {
-            return {
-              message: "Hello Vue!",
-              items: [1, 2, 3],
-            };
-          },
-        });
-        console.log(vm.items, "vm.data");
-      </script>
     </div>
+    <script src="./dist/vue.js"></script>
+    <script>
+      // Vue.js 是响应式框架
+      // Vue.js 是 MVVM 框架 MVVM是 Model View ViewModel 数据影响视图，视图影响数据
+
+      // vue 初始化流程
+      // 1. 初始化数据
+      // 2. 编译模板  template render el 注意 el 必须要有 render（） template标签
+      // 3. 挂载组件
+      // 4. 渲染视图
+      const vm = new Vue({
+        el: "#app",
+        data() {
+          return {
+            message: "Hello Vue!",
+            items: [1, 2, 3],
+          };
+        },
+      });
+    </script>
   </body>
 </html>
