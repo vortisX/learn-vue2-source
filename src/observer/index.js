@@ -1,6 +1,5 @@
+import { newArrayProtoMethods } from "./array";
 export function observer(data) {
-  // 这里可以添加观察者逻辑
-  console.log("Observing data changes", data);
   // 如果data是空的 将不进行观察
   if (!data || typeof data !== "object") {
     return data;
@@ -16,16 +15,31 @@ export function observer(data) {
 
 class Observer {
   constructor(data) {
-    this.walk(data);
+    Object.defineProperty(data, "__ob__", {
+      enumerable: false, // 不可枚举
+      value: this,
+    });
+    // 只有第二轮或者更深层次的属性上，val才可以能数组 第一次进入时只可能是一个对象
+    if (Array.isArray(data)) {
+      data.__proto__ = newArrayProtoMethods; // 替换数组的原型方法
+      this.observerArray(data); // 劫持数组
+    } else {
+      this.walk(data); // 遍历对象的属性进行劫持
+    }
   }
+  // 遍历对象的属性进行劫持
   walk(data) {
     Object.keys(data).forEach((key) => {
+      console.log(`Defining reactive property: ${key}`);
       this.defineReactive(data, key, data[key]);
     });
   }
+  // 定义响应式属性
   defineReactive(data, key, val) {
     // 这里可以添加劫持逻辑
     // object.defineProperty只能劫持一层 需要递归进行劫持
+    // 在第二轮或者更深层次的属性上，val可能是一个对象或数组
+    // 在第一层时 val 可能是一个基本类型
     observer(val); // 劫持子属性
     Object.defineProperty(data, key, {
       get() {
@@ -38,6 +52,13 @@ class Observer {
         observer(newVal); // 劫持新值
         val = newVal;
       },
+    });
+  }
+  // 劫持数组的每个元素
+  observerArray(data) {
+    data.forEach((item) => {
+      // 劫持数组的每个元素
+      observer(item);
     });
   }
 }

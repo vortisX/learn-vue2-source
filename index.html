@@ -20,10 +20,11 @@
           data() {
             return {
               message: "Hello Vue!",
+              items: [1, 2, 3],
             };
           },
         });
-        console.log(vm._data);
+        console.log(vm._data.items.push({ key: 1 }), vm._data, "vm._data");
       </script>
     </div>
   </body>
