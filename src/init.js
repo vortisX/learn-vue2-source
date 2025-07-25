@@ -23,9 +23,30 @@ export function initMixin(Vue) {
       // 如果用户没有传入render函数，则使用模板编译
       const template = vm.$options.template;
       if (!template && el) {
-        // 如果没有模板且有el，则获取el的innerHTML作为模板
-        vm.$options.template = document.querySelector(el).innerHTML;
+        // 如果没有模板且有el，则获取el的outerHTML作为模板
+        vm.$options.template = document.querySelector(el).outerHTML;
       }
     }
   };
+  // ast语法树
+  /**
+   * {
+   *   type: 'Element',
+   *   tag: 'div',
+   *   style: {
+   *     color: 'red',
+   *     fontSize: '14px'
+   *   },
+   *   attrs: [
+   *     { name: 'id', value: 'app' },
+   *     { name: 'class', value: 'container' }
+   *   ],
+   *   children: [
+   *     {
+   *       type: 'Text',
+   *       content: 'Hello, Vue!'
+   *     }
+   *   ]
+   * }
+   */
 }
