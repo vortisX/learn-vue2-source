@@ -1,3 +1,4 @@
+import { compileToFunction } from "./compile/index";
 import { initState } from "./initState";
 
 export function initMixin(Vue) {
@@ -25,6 +26,7 @@ export function initMixin(Vue) {
       if (!template && el) {
         // 如果没有模板且有el，则获取el的outerHTML作为模板
         vm.$options.template = document.querySelector(el).outerHTML;
+        let ast = compileToFunction(vm.$options.template);
       }
     }
   };
