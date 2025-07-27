@@ -116,7 +116,6 @@ export function parseHtml(template) {
     // 属性可能有多个，使用while循环解析
     let attr;
     let end;
-    console.log(template.match(startTagClose), " endTagClose");
     while (
       !(end = template.match(startTagClose)) &&
       (attr = template.match(attribute))
