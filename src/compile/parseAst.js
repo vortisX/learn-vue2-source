@@ -6,11 +6,11 @@ import { startTagOpen, attribute, startTagClose, endTag } from "./rule.js";
  * @param {object} attrs - 属性对象
  * @returns {object} - AST元素
  */
-function createAstElement(tagName, attrs) {
+function createAstElement(tag, attrs) {
   return {
     type: "element",
-    tag: tagName,
-    attrs: attrs,
+    tag,
+    attrs,
     children: [],
     parent: null,
   };
@@ -37,7 +37,7 @@ function start(tagName, attrs) {
  * @param {string} text
  */
 function charts(text) {
-  text = text.replace(/ /g, ""); // 去除多余空格
+  text = text.replace(/\s/g, ""); // 去除多余空格
   if (text) {
     // 如果文本不为空，则创建文本节点
     let element = {
@@ -51,14 +51,14 @@ function charts(text) {
 }
 /**
  * 获取结束标签
- * @param {string} tagName - 标签名
  */
-function end(tagName) {
+function end() {
   // 找到当前元素在栈中的索引
   let element = stack.pop();
   currentParent = stack[stack.length - 1]; // 更新当前父节点
   if (currentParent) {
-    element.parent.push(element);
+    element.parent = currentParent;
+    currentParent.children.push(element); // 将当前元素添加到父节点的子节点中
   }
 }
 
@@ -74,15 +74,14 @@ export function parseHtml(template) {
     // 找到<的话 证明template前边是标签 可能是开始标签或结束标签 未找到 证明是文本
     if (textEnd === 0) {
       let startTagMatch = parseStartTag(); // 解析开始标签
-      console.log(startTagMatch, "startTagMatch");
       if (startTagMatch) {
         start(startTagMatch.tagName, startTagMatch.attrs);
         continue; // 继续解析下一个部分
       }
       let endTagMatch = template.match(endTag); // 匹配结束标签
       if (endTagMatch) {
-        end(endTagMatch[1]); // 结束标签
         advance(endTagMatch[0].length); // 删除结束标签
+        end(endTagMatch[1]); // 结束标签
         continue; // 继续解析下一个部分
       }
     }
@@ -117,6 +116,7 @@ export function parseHtml(template) {
     // 属性可能有多个，使用while循环解析
     let attr;
     let end;
+    console.log(template.match(startTagClose), " endTagClose");
     while (
       !(end = template.match(startTagClose)) &&
       (attr = template.match(attribute))
@@ -124,15 +124,14 @@ export function parseHtml(template) {
       // 将属性名和值保存到match.attrs中
       match.attrs.push({
         name: attr[1], // 属性名
-        value: attr[3] || attr[4] || attr[5] || "", // 属性值
+        value: attr[3] || attr[4] || attr[5], // 属性值
       });
       advance(attr[0].length); // 前进到下一个位置
-      end = template.match(startTagClose); // 再次尝试匹配开始标签的闭合部分
-      if (end) {
-        // 如果找到了开始标签的闭合部分，结束循环并删除>
-        advance(end[0].length); // 前进到下一个位置
-        return match; // 返回解析结果
-      }
+    }
+    if (end) {
+      // 如果找到了开始标签的闭合部分，结束循环并删除>
+      advance(end[0].length); // 前进到下一个位置
+      return match; // 返回解析结果
     }
   }
 

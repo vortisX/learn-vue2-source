@@ -30,25 +30,4 @@ export function initMixin(Vue) {
       }
     }
   };
-  // ast语法树
-  /**
-   * {
-   *   type: 'Element',
-   *   tag: 'div',
-   *   style: {
-   *     color: 'red',
-   *     fontSize: '14px'
-   *   },
-   *   attrs: [
-   *     { name: 'id', value: 'app' },
-   *     { name: 'class', value: 'container' }
-   *   ],
-   *   children: [
-   *     {
-   *       type: 'Text',
-   *       content: 'Hello, Vue!'
-   *     }
-   *   ]
-   * }
-   */
 }
