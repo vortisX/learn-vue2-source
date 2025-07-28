@@ -6,9 +6,8 @@
     <title>Document</title>
   </head>
   <body>
-    <div id="app">
-      hellow{{ message }}
-      <span>1234</span>
+    <div id="app" style="color: aqua; font-size: 30px" class="app">
+      hellow {{name}} {{age}}world
     </div>
     <script src="./dist/vue.js"></script>
     <script>
@@ -24,7 +23,8 @@
         el: "#app",
         data() {
           return {
-            message: "Hello Vue!",
+            name: "Hello Vue!",
+            age: 18,
             items: [1, 2, 3],
           };
         },
