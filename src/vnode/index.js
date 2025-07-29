@@ -23,6 +23,7 @@ export function renderMixin(Vue) {
    * 将变量转换为字符串
    */
   Vue.prototype._s = function (val) {
+    console.log(val,'_s 被调用'); // 添加调试信息
     return val == null
       ? ""
       : typeof val === "object"
@@ -58,11 +59,11 @@ export function renderMixin(Vue) {
   }
   /**
    * 创建元素虚拟节点
-   * @param {*} tag 
-   * @param {*} data 
-   * @param {*} children 
-   * @param {*} text 
-   * @returns 
+   * @param {*} tag
+   * @param {*} data
+   * @param {*} children
+   * @param {*} text
+   * @returns
    */
   function vnode(tag, data = {}, children = [], text) {
     return {
