@@ -150,7 +150,7 @@ function gen(node) {
  * 示例输出：
  * _c('div', {id: "app"}, [_c('span', null, [_v('hello')])])
  */
-export function generate(ast) {
+export function  generate(ast) {
   // 生成子节点代码
   let children = genChildren(ast);
 
