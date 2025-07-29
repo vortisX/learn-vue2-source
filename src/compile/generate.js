@@ -157,7 +157,7 @@ export function  generate(ast) {
   // 拼接完整的代码字符串
   let code = `_c('${ast.tag}',${
     ast.attrs.length ? `${genProps(ast.attrs)}` : "null"
-  },${children ? `[${children}]` : "null"})`;
+  },${children ? `${children}` : "null"})`;
 
   console.log("Generated code:", code);
   return code;

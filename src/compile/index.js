@@ -10,5 +10,6 @@ export function compileToFunction(template) {
   // 将字符串变为函数
   // 使用 with 包装可以让我们在函数内部直接访问数据属性
   let render = new Function("with(this){return " + code + "}");
-  console.log(render);
+  
+  return render;
 }

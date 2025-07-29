@@ -3,7 +3,7 @@ import serve from 'rollup-plugin-serve'
 
 export default {
     // 指定入口文件
-    input :'./index.js', // 入口文件
+    input :'./src/index.js', // 入口文件
     // 指定输出文件
     output:{
         file:'dist/vue.js', // 输出文件路径
