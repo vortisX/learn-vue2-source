@@ -49,7 +49,6 @@ function gen(node) {
     let lastIndex = (defaultTagRE.lastIndex = 0);
     let match;
     while ((match = defaultTagRE.exec(text))) {
-      console.log(match, "match");
       let index = match.index;
       // 添加内容
       if (index > lastIndex) {
