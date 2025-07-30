@@ -30,7 +30,6 @@ class Observer {
   // 遍历对象的属性进行劫持
   walk(data) {
     Object.keys(data).forEach((key) => {
-      console.log(`Defining reactive property: ${key}`);
       this.defineReactive(data, key, data[key]);
     });
   }
@@ -43,11 +42,9 @@ class Observer {
     observer(val); // 劫持子属性
     Object.defineProperty(data, key, {
       get() {
-        console.log(`Getting ${key}: ${val}`);
         return val;
       },
       set(newVal) {
-        console.log(`Setting ${key}: ${newVal}`);
         if (newVal === val) return; // 如果新值和旧值相同则不进行更新
         observer(newVal); // 劫持新值
         val = newVal;

@@ -3,7 +3,6 @@
  * @param {Function} Vue - Vue构造函数
  */
 export function renderMixin(Vue) {
-  console.log("renderMixin 被调用"); // 添加调试信息
   /**
    * 创建元素节点
    */
@@ -23,7 +22,6 @@ export function renderMixin(Vue) {
    * 将变量转换为字符串
    */
   Vue.prototype._s = function (val) {
-    console.log(val,'_s 被调用'); // 添加调试信息
     return val == null
       ? ""
       : typeof val === "object"
@@ -37,7 +35,6 @@ export function renderMixin(Vue) {
     let vm = this;
     let render = vm.$options.render;
     let vnode = render.call(this);
-    console.log("Generated vnode:", vnode);
     return vnode;
   };
   /**

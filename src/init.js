@@ -18,7 +18,7 @@ export function initMixin(Vue) {
   };
   Vue.prototype.$mount = function (el) {
     let vm = this;
-    console.log("$mount 被调用, el:", el);
+    vm.$el = document.querySelector(el);
     if (!vm.$options.render) {
       // 如果用户没有传入render函数，则使用模板编译
       const template = vm.$options.template;

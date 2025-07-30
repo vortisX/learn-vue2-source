@@ -1,3 +1,4 @@
+import { initGlobalApi } from "./global-api/index";
 import { initMixin } from "./init";
 import { lifecycleMixin } from "./lifecycle";
 import { renderMixin } from "./vnode/index";
@@ -20,7 +21,6 @@ console.log("lifecycleMixin 完成");
 renderMixin(Vue);
 console.log("renderMixin 完成");
 
-// 验证方法是否存在
-console.log("Vue.prototype._render:", typeof Vue.prototype._render);
-
+initGlobalApi(Vue);
+console.log("initGlobalApi 完成");
 export default Vue;

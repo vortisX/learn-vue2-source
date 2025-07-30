@@ -159,6 +159,5 @@ export function  generate(ast) {
     ast.attrs.length ? `${genProps(ast.attrs)}` : "null"
   },${children ? `${children}` : "null"})`;
 
-  console.log("Generated code:", code);
   return code;
 }
