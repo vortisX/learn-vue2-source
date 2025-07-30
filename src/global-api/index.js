@@ -1,6 +1,11 @@
+import { mergeOptions } from "../utils/index";
+
 export function initGlobalApi(Vue) {
+  console.log(Vue.options, "options");
+
+  Vue.options = {};
   Vue.Mixin = function (mixin) {
-    console.log("全局混入:", mixin);
-    // 这里可以实现全局混入的逻辑
+    this.options = mergeOptions(this.options, mixin);
+    console.log(this.options);
   };
 }

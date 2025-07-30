@@ -29,6 +29,30 @@
           };
         },
       });
+      Vue.Mixin({
+        data() {
+          return {
+            name: "vortisX",
+            age: 18,
+          };
+        },
+        created() {
+          console.log("Mixin created hook called");
+        },
+        beforeDestroy() {
+          console.log("Mixin beforeDestroy hook called");
+        },
+        methods: {
+          greet() {
+            console.log(`Hello, my name is ${this.name}`);
+          },
+        },
+        watch: {
+          name(newVal, oldVal) {
+            console.log(`Name changed from ${oldVal} to ${newVal}`);
+          },
+        },
+      });
     </script>
   </body>
 </html>

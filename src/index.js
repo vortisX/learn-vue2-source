@@ -4,7 +4,6 @@ import { lifecycleMixin } from "./lifecycle";
 import { renderMixin } from "./vnode/index";
 
 function Vue(option) {
-  console.log("Vue 运行了");
   console.log("入参:", option);
   this._init(option);
 }
