@@ -1,4 +1,4 @@
-import { observer } from "./observer/index";
+import { observer } from "../observer/index";
 
 export function initData(vm) {
   let data = vm.$options.data; // 获取用户传入的data

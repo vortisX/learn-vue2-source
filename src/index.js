@@ -1,5 +1,5 @@
 import { initGlobalApi } from "./global-api/index";
-import { initMixin } from "./init";
+import { initMixin } from "./init/index";
 import { lifecycleMixin } from "./lifecycle";
 import { renderMixin } from "./vnode/index";
 

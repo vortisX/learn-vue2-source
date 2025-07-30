@@ -1,6 +1,6 @@
-import { compileToFunction } from "./compile/index";
+import { compileToFunction } from "../compile/index";
 import { initState } from "./initState";
-import { mountComponent } from "./lifecycle";
+import { mountComponent } from "../lifecycle";
 
 export function initMixin(Vue) {
   // 在Vue构造函数上添加_init方法
