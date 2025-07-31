@@ -8,14 +8,30 @@ export const HOOKS = [
   "beforeDestroy",
   "destroyed",
 ];
-let starts = {};
-starts.data = mergeHook; // 合并data
-starts.props = mergeHook; // 合并props
-starts.methods = mergeHook; // 合并methods
-starts.computed = mergeHook; // 合并computed
-starts.watch = mergeHook; // 合并watch
+let strats = {};
+// 其他策略函数
+strats.data = function (parent, child) {
+  return child || parent;
+};
+
+strats.props = function (parent, child) {
+  return child || parent;
+};
+
+strats.methods = function (parent, child) {
+  return child || parent;
+};
+
+strats.computed = function (parent, child) {
+  return child || parent;
+};
+
+strats.watch = function (parent, child) {
+  return child || parent;
+};
+
 HOOKS.forEach((hook) => {
-  starts[hook] = mergeHook;
+  strats[hook] = mergeHook;
 });
 
 function mergeHook(parent, child) {
@@ -25,28 +41,33 @@ function mergeHook(parent, child) {
     } else {
       return [child];
     }
+  } else {
+    return parent;
   }
 }
+
 export function mergeOptions(parent, child) {
-  console.log("Merging options:", parent, child);
   const options = {};
   // 如有父亲没儿子  hasOwnProperty是用来检查对象是否具有指定的属性
   for (const key in parent) {
     mergeField(key);
   }
   for (const key in child) {
-    mergeField(key);
+    if (!parent.hasOwnProperty(key)) {
+      mergeField(key);
+    }
   }
+
   /**
    * 合并单个字段
    */
   function mergeField(key) {
-    if (starts[key]) {
-      options[key] = starts[key](parent[key], child[key]);
+    if (strats[key]) {
+      options[key] = strats[key](parent[key], child[key]);
     } else {
-      options[key] = child[key];
+      options[key] = child[key] || parent[key];
     }
   }
-  console.log(options, "merged options");
+
   return options;
 }

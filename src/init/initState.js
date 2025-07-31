@@ -5,7 +5,6 @@ import { initWatch } from "./initWatch";
 import { initProps } from "./initProps";
 
 export function initState(vm) {
-    console.log("初始化状态");
     let option = vm.$options;
     // 判断option中是否有data属性
     if (option.data) {
