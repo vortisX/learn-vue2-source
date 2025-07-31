@@ -19,36 +19,6 @@
       // 2. 编译模板  template render el 注意 el 必须要有 render（） template标签
       // 3. 挂载组件
       // 4. 渲染视图
-      Vue.Mixin({
-        data() {
-          return {
-            name: "vortisX",
-            age: 18,
-          };
-        },
-        beforeCreate() {
-          console.log("Mixin beforeCreate hook called");
-        },
-        created() {
-          console.log("Mixin created hook called");
-        },
-        mounted() {
-          console.log("Mixin mounted hook called");
-        },
-        beforeMount() {
-          console.log("Mixin beforeMount hook called");
-        },
-        methods: {
-          greet() {
-            console.log(`Hello, my name is ${this.name}`);
-          },
-        },
-        watch: {
-          name(newVal, oldVal) {
-            console.log(`Name changed from ${oldVal} to ${newVal}`);
-          },
-        },
-      });
       const vm = new Vue({
         el: "#app",
         data() {
@@ -62,6 +32,10 @@
           console.log("Vue instance created hook called");
         },
       });
+      setTimeout(() => {
+        vm.name = "vortisY";
+        vm.age = 20;
+      }, (timeout = 1000));
     </script>
   </body>
 </html>

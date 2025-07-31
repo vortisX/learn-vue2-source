@@ -1,4 +1,6 @@
 import { newArrayProtoMethods } from "./array";
+import Dep from "./dep";
+
 export function observer(data) {
   // 如果data是空的 将不进行观察
   if (!data || typeof data !== "object") {
@@ -40,14 +42,20 @@ class Observer {
     // 在第二轮或者更深层次的属性上，val可能是一个对象或数组
     // 在第一层时 val 可能是一个基本类型
     observer(val); // 劫持子属性
+    let dep = new Dep(); // 创建一个新的 dep 实例
+    // 添加依赖收集
     Object.defineProperty(data, key, {
       get() {
+        if (Dep.target) {
+          dep.addSub(Dep.target); // 依赖收集
+        }
         return val;
       },
       set(newVal) {
         if (newVal === val) return; // 如果新值和旧值相同则不进行更新
         observer(newVal); // 劫持新值
         val = newVal;
+        dep.notify(); // 通知所有订阅者
       },
     });
   }

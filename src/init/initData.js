@@ -1,5 +1,5 @@
 import { observer } from "../observer/index";
-
+import { callHook } from "../lifecycle";
 export function initData(vm) {
   let data = vm.$options.data; // 获取用户传入的data
   // data 属性既可以是对象，也可以是函数 所以先要判断类型
@@ -25,7 +25,9 @@ function proxy(target, sourceKey, key) {
       return target[sourceKey][key]; // 返回data上的属性值
     },
     set(newVal) {
+      callHook(vm, "beforeUpdate"); // 调用更新钩子
       target[sourceKey][key] = newVal; // 设置data上的属性值
+      callHook(vm, "updated"); // 调用更新钩子
     },
   });
 }

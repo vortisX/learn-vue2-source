@@ -1,9 +1,13 @@
 import { patch } from "./vnode/patch";
-
+import watcher from "./observer/watcher";
 export function mountComponent(vm, el) {
   // 调用beforeMount钩子
   callHook(vm, "beforeMount");
-  vm._update(vm._render());
+  let updateComponent = () => {
+    vm._update(vm._render()); // 调用_render函数生成虚拟DOM并更新
+  };
+  // 创建一个watcher实例 用于更新组件
+  new watcher(vm, updateComponent, () => {}, true);
   // 挂载到页面上
   callHook(vm, "mounted");
 }
