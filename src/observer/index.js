@@ -47,7 +47,7 @@ class Observer {
     Object.defineProperty(data, key, {
       get() {
         if (Dep.target) {
-          dep.addSub(Dep.target); // 依赖收集
+          dep.depend(Dep.target); // 依赖收集
         }
         return val;
       },

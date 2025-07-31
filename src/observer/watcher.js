@@ -1,4 +1,4 @@
-import { pushTarget,popTarget } from "./dep";
+import { pushTarget, popTarget } from "./dep";
 
 let id = 100; // 用于生成唯一的 watcher ID
 class watcher {
@@ -8,6 +8,9 @@ class watcher {
     this.cb = cb; // 回调函数
     this.options = options;
     this.id = id++; // watcher 的唯一标识符
+    this.deps = []; // 依赖列表
+    this.depsId = new Set(); // 用于去重的 Set 集合
+
     if (typeof updateComponent === "function") {
       this.getter = updateComponent; // 如果是函数则直接使用 用于更新视图
     }
@@ -23,6 +26,15 @@ class watcher {
     this.get(); // 重新获取数据并更新视图
     if (this.cb) {
       this.cb(); // 调用回调函数
+    }
+  }
+  addDep(dep) {
+    // 1.去重
+    let id = dep.id; // 获取 dep 的唯一标识符
+    if (!this.depsId.has(id)) {
+      this.depsId.add(id); // 将 id 添加到 Set 集合中
+      this.deps.push(dep); // 将 dep 添加到 deps 数组中
+      dep.addSub(this); // 将当前 watcher 添加到 dep 的订阅者列表中
     }
   }
 }

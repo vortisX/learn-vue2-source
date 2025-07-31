@@ -8,14 +8,16 @@ class Dep {
    */
   depend() {
     if (Dep.target) {
-      this.addSub(Dep.target);
+      Dep.target.addDep(this); // 将当前的 watcher 添加到 dep 的订阅者列表中
     }
   }
-  // 添加订阅者
-  addSub(sub) {
-    this.subs.push(sub);
+  addSub(watcher) {
+    this.subs.push(watcher);
   }
-  // 通知所有订阅者
+  /**
+   * 通知所有订阅者
+   * 当属性值发生变化时，dep 会通知所有订阅者进行更新
+   */
   notify() {
     this.subs.forEach((sub) => sub.update());
   }
