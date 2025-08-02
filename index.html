@@ -7,7 +7,7 @@
   </head>
   <body>
     <div id="app" style="color: aqua; font-size: 30px" class="app">
-      我的名字叫 {{userInfo.name}}，年龄是 {{userInfo.age}} 岁。 {{items}}
+      我的名字叫 {{name}}，年龄是 {{age}} 岁。
     </div>
     <script src="./dist/vue.js"></script>
     <script>
@@ -23,23 +23,25 @@
         el: "#app",
         data() {
           return {
-            userInfo: {
-              name: "vortisX",
-              age: 18,
-            },
-            items: [{ a: 1 }, 2, 3],
+            name: "vortisX",
+            age: 18,
           };
         },
         created() {
-          console.log("Vue instance created hook called");
+          console.log("Vue instance created");
         },
       });
+
+      // 测试自动更新
       setTimeout(() => {
-        vm.userInfo.name = "vortisY";
-        vm.userInfo.age = 20;
-        vm.items.push(4);
-        vm.items[0].a = 2; // 修改数组中的对象属性
-      }, (timeout = 1000));
+        console.log("Updating name...");
+        vm.name = "vortisY"; // 这应该触发视图更新
+      }, 1000);
+
+      setTimeout(() => {
+        console.log("Updating age...");
+        vm.age = 20; // 这也应该触发视图更新
+      }, 2000);
     </script>
   </body>
 </html>
