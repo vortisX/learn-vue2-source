@@ -16,17 +16,16 @@ class watcher {
     }
     this.get();
   }
+  run() {
+    this.get();
+  }
   get() {
     pushTarget(this); // 将当前 watcher 推入 dep.target
     this.getter(); // 执行更新组件的方法
     popTarget(); // 执行完毕后清除 dep.target
   }
   update() {
-    // 这里可以添加一些逻辑，比如判断是否需要更新
-    this.get(); // 重新获取数据并更新视图
-    if (this.cb) {
-      this.cb(); // 调用回调函数
-    }
+    queueWatcher(this); // 将当前 watcher 添加到更新队列
   }
   addDep(dep) {
     // 1.去重
@@ -47,3 +46,29 @@ export default watcher;
 // watcher 是一个观察者对象 用于监听数据变化 在视图上用了几个 就有几个watcher
 // 当数据变化时，dep 会通知所有的 watcher 执行更新操作
 // 当数据变化时，watcher 会被通知并执行相应的更新逻辑
+
+let queue = []; // 更新队列
+let has = {}; // 用于去重的对象
+let flushing = false; // 是否正在刷新队列
+/**
+ * 将 watcher 添加到更新队列中
+ * @param {watcher} watcher
+ */
+function queueWatcher(watcher) {
+  let id = watcher.id; // 获取 watcher 的唯一标识符
+  // 如果 has[id] 不存在 或者 has[id] 为 null 则表示该 watcher 尚未被添加到队列中
+  if (has[id] === null || has[id] === undefined) {
+    has[id] = true; // 将 id 添加到 has 对象中
+    queue.push(watcher); // 将 watcher 添加到更新队列
+    // 防抖
+    if (!flushing) {
+      setTimeout(() => {
+        queue.forEach((item) => item.run());
+        queue = [];
+        has = {};
+        flushing = false;
+      }, 0);
+    }
+    flushing = true;
+  }
+}
