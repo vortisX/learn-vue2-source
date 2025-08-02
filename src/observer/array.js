@@ -24,12 +24,15 @@ methods.forEach((method) => {
         inserted = args.slice(2);
         break;
     }
+    let ob = this.__ob__;
     if (inserted) {
-      let ob = this.__ob__;
       if (ob) {
         ob.observerArray(inserted); // 劫持新添加的数组元素
       }
     }
+
+    console.log(ob,'ob');
+    ob.dep.notify(); // 通知所有订阅者
     return result;
   };
 });

@@ -1,5 +1,9 @@
+let uid = 0; // 用于生成唯一的 dep ID
 class Dep {
+  target = null; // 静态属性 用于存储当前的 watcher
+  id = 0; // 用于生成唯一的 dep ID
   constructor() {
+    this.id = uid++; // 生成唯一的 dep ID
     this.subs = []; // 订阅者列表
   }
   /**
@@ -11,8 +15,8 @@ class Dep {
       Dep.target.addDep(this); // 将当前的 watcher 添加到 dep 的订阅者列表中
     }
   }
-  addSub(watcher) {
-    this.subs.push(watcher);
+  addSub(sub) {
+    this.subs.push(sub);
   }
   /**
    * 通知所有订阅者
@@ -23,7 +27,6 @@ class Dep {
   }
 }
 export default Dep;
-Dep.target = null; // 静态属性 用于存储当前的 watcher
 export function pushTarget(watcher) {
   Dep.target = watcher; // 设置当前的 watcher
 }

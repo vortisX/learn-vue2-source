@@ -21,6 +21,7 @@ class Observer {
       enumerable: false, // 不可枚举
       value: this,
     });
+    this.dep = new Dep(); // 创建一个新的 dep 实例
     // 只有第二轮或者更深层次的属性上，val才可以能数组 第一次进入时只可能是一个对象
     if (Array.isArray(data)) {
       data.__proto__ = newArrayProtoMethods; // 替换数组的原型方法
@@ -41,13 +42,19 @@ class Observer {
     // object.defineProperty只能劫持一层 需要递归进行劫持
     // 在第二轮或者更深层次的属性上，val可能是一个对象或数组
     // 在第一层时 val 可能是一个基本类型
-    observer(val); // 劫持子属性
+    let childOb = observer(val); // 劫持子属性
     let dep = new Dep(); // 创建一个新的 dep 实例
     // 添加依赖收集
     Object.defineProperty(data, key, {
+      enumerable: true, // 可枚举
+      configurable: true, // 可配置
+      // getter 和 setter
       get() {
         if (Dep.target) {
           dep.depend(Dep.target); // 依赖收集
+          if (childOb.dep) {
+            childOb.dep.depend(Dep.target);
+          }
         }
         return val;
       },
