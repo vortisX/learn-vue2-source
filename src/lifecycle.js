@@ -40,7 +40,9 @@ export function mountComponent(vm, el) {
   new watcher(
     vm, // Vue实例
     updateComponent, // 更新函数
-    () => {}, // 回调函数（暂时为空）
+    () => {
+      callHook(vm, "updated"); // 更新完成后调用updated钩子
+    }, // 回调函数
     true // 选项参数
   );
 

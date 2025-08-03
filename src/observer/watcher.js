@@ -1,16 +1,16 @@
 import { pushTarget, popTarget } from "./dep";
-
+import { nextTick } from "../utils/nextTick";
 let id = 100; // 用于生成唯一的 watcher ID，避免重复和冲突
 
 /**
  * Watcher类 - Vue响应式系统的核心观察者
- * 
+ *
  * Watcher是Vue响应式系统中的观察者，负责：
  * 1. 监听数据变化
  * 2. 执行更新回调
  * 3. 收集依赖关系
  * 4. 触发重新渲染
- * 
+ *
  * Vue中的Watcher类型：
  * 1. 渲染Watcher：监听模板中使用的数据，数据变化时重新渲染
  * 2. 计算属性Watcher：监听计算属性依赖的数据
@@ -19,7 +19,7 @@ let id = 100; // 用于生成唯一的 watcher ID，避免重复和冲突
 class watcher {
   /**
    * Watcher构造函数
-   * 
+   *
    * @param {Object} vm - Vue实例对象
    * @param {Function} updateComponent - 更新组件的方法，通常是重新渲染的函数
    * @param {Function} cb - 回调函数，数据变化时执行
@@ -38,7 +38,7 @@ class watcher {
     if (typeof updateComponent === "function") {
       this.getter = updateComponent; // 用于更新视图的函数
     }
-    
+
     // 立即执行一次，进行初始化和依赖收集
     this.get();
   }
@@ -80,12 +80,12 @@ class watcher {
    * 在响应式属性的getter中被调用，建立属性和watcher之间的双向依赖关系：
    * 1. watcher记录它依赖哪些属性（deps数组）
    * 2. 属性记录哪些watcher依赖它（dep的subs数组）
-   * 
+   *
    * @param {Dep} dep - 要添加的依赖对象
    */
   addDep(dep) {
     let id = dep.id; // 获取 dep 的唯一标识符
-    
+
     // 去重处理：同一个属性在一次更新中可能被多次访问，但只需要收集一次依赖
     if (!this.depsId.has(id)) {
       this.depsId.add(id); // 将 id 添加到 Set 集合中，用于快速查重
@@ -98,7 +98,7 @@ class watcher {
 export default watcher;
 
 // ============== 响应式系统工作原理说明 ==============
-// 
+//
 // 依赖收集过程：
 // 1. 组件渲染时创建渲染watcher
 // 2. 渲染过程中访问响应式数据
@@ -115,43 +115,89 @@ export default watcher;
 // 6. 重新执行渲染函数，更新视图
 
 // ============== 更新队列系统 ==============
+//
+// Vue的异步更新机制：
+// Vue不会在每次数据变化时立即更新DOM，而是将所有变化收集起来，
+// 在下一个事件循环中批量处理，这样可以：
+// 1. 避免重复渲染：如果同一个组件的多个数据同时变化，只渲染一次
+// 2. 提高性能：减少DOM操作次数
+// 3. 保证更新顺序：父组件总是在子组件之前更新
 
 let queue = []; // 更新队列，存储待更新的watcher
 let has = {}; // 用于去重的对象，记录哪些watcher已经在队列中
 let flushing = false; // 标记是否正在刷新队列，防止重复执行
 
 /**
+ * 在下一个事件循环中执行更新队列
+ * 
+ * 执行流程：
+ * 1. 遍历队列中的所有watcher
+ * 2. 调用每个watcher的run方法，触发重新渲染或重新计算
+ * 3. 如果watcher有回调函数，则执行回调
+ * 4. 清理队列，为下一轮更新做准备
+ */
+let flushWatcher = () => {
+  // 批量执行所有watcher的更新
+  queue.forEach((item) => {
+    item.run(); // 执行watcher的更新逻辑（重新渲染/重新计算）
+    item.cb && item.cb(); // 如果有回调函数则执行
+  });
+
+  // 清理队列和标记，为下一次更新做准备
+  queue = []; // 清空更新队列
+  has = {}; // 清空去重对象
+  flushing = false; // 重置刷新标记，允许下一轮更新
+};
+
+/**
  * 将 watcher 添加到更新队列中
- * 
- * 更新队列的作用：
- * 1. 去重：同一个watcher在一次更新周期中只执行一次
- * 2. 批量处理：收集所有需要更新的watcher，统一在下一个tick中执行
- * 3. 性能优化：避免频繁的DOM操作，提高渲染性能
- * 
+ *
+ * 这是Vue异步更新的核心函数，实现了以下机制：
+ * 1. 去重机制：同一个watcher在一个更新周期中只会被执行一次
+ * 2. 批量处理：将多个watcher的更新合并到一个事件循环中执行
+ * 3. 防抖机制：避免频繁触发队列刷新
+ *
+ * 更新时机：
+ * - 同步代码执行完毕后
+ * - DOM事件处理完毕后
+ * - Promise回调执行前
+ *
  * @param {watcher} watcher - 要添加到队列的watcher实例
  */
 function queueWatcher(watcher) {
   let id = watcher.id; // 获取 watcher 的唯一标识符
-  
+
   // 去重处理：如果watcher不在队列中，才添加
+  // 这确保了同一个watcher在一个更新周期中只执行一次
   if (has[id] === null || has[id] === undefined) {
-    has[id] = true; // 标记该watcher已在队列中
+    has[id] = true; // 标记该watcher已在队列中，防止重复添加
     queue.push(watcher); // 将 watcher 添加到更新队列
-    
+
     // 防抖处理：如果当前没有正在刷新队列，则开始新的刷新周期
+    // 这确保了在一个事件循环中，无论有多少数据变化，都只会触发一次队列刷新
     if (!flushing) {
-      // 使用setTimeout实现异步更新，将更新推迟到下一个事件循环
-      // 这样可以收集一个事件循环中的所有数据变化，然后批量更新
-      setTimeout(() => {
-        // 批量执行所有watcher的更新
-        queue.forEach((item) => item.run());
-        
-        // 清理队列和标记，为下一次更新做准备
-        queue = [];
-        has = {};
-        flushing = false;
-      }, 0);
+      nextTick(flushWatcher); // 在下一个事件循环中执行刷新队列
+      flushing = true; // 标记正在刷新，防止重复开启刷新周期
     }
-    flushing = true; // 标记正在刷新，防止重复开启刷新周期
   }
 }
+
+// ============== 异步更新的优势 ==============
+//
+// 1. 性能优化：
+//    - 减少DOM操作次数，避免频繁的重排和重绘
+//    - 同一组件的多次数据变化只触发一次重新渲染
+//
+// 2. 用户体验：
+//    - 确保所有同步操作完成后再更新视图
+//    - 避免用户看到中间状态的闪烁
+//
+// 3. 开发友好：
+//    - 自动处理更新时序，开发者无需手动控制
+//    - 支持在数据变化后立即访问更新后的DOM（通过$nextTick）
+//
+// 例子：
+// this.count = 1;
+// this.count = 2;
+// this.count = 3;
+// // 以上三行代码只会触发一次重新渲染，最终显示count=3

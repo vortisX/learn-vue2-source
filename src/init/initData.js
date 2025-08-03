@@ -62,15 +62,8 @@ function proxy(target, sourceKey, key) {
      * 同时触发相应的生命周期钩子
      */
     set(newVal) {
-      // 在数据更新前触发beforeUpdate钩子
-      // 注意：这里直接调用callHook，实际Vue的实现更复杂
-      callHook(vm, "beforeUpdate");
-
       // 设置源对象上对应属性的值
       target[sourceKey][key] = newVal;
-
-      // 在数据更新后触发updated钩子
-      callHook(vm, "updated");
     },
   });
 }

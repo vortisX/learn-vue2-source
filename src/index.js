@@ -2,16 +2,16 @@ import { initGlobalApi } from "./global-api/index";
 import { initMixin } from "./init/index";
 import { lifecycleMixin } from "./lifecycle";
 import { renderMixin } from "./vnode/index";
-
+import { stateMixin } from "./init/initState";
 /**
  * Vue构造函数
  * 这是Vue框架的入口点，所有Vue实例都通过这个构造函数创建
- * 
+ *
  * 构造函数的设计：
  * 1. 只能通过new关键字调用，确保正确的实例化过程
  * 2. 接收options参数，包含组件的所有配置
  * 3. 立即调用_init方法开始初始化流程
- * 
+ *
  * @param {Object} option - Vue实例的配置选项
  */
 function Vue(option) {
@@ -42,6 +42,11 @@ console.log("renderMixin 完成");
 // 添加Vue.mixin、Vue.extend、Vue.component等全局方法
 initGlobalApi(Vue);
 console.log("initGlobalApi 完成");
+
+// 5. 状态管理相关方法
+// 添加$nextTick、$set、$delete等方法，处理数据响应式和更新
+stateMixin(Vue);
+console.log("stateMixin 完成");
 
 export default Vue;
 
