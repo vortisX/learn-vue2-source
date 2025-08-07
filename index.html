@@ -33,6 +33,39 @@
         updated() {
           console.log("Vue instance updated");
         },
+        // watch的方式1 函数
+        // watch: {
+        //   name(newName, oldName) {
+        //     console.log(`Name changed from ${oldName} to ${newName}`);
+        //   },
+        //   age(newAge, oldAge) {
+        //     console.log(`Age changed from ${oldAge} to ${newAge}`);
+        //   },
+        // },
+        // watch的方式2 对象
+        watch: {
+          name: {
+            handler(newName, oldName) {
+              console.log(`Name changed from ${oldName} to ${newName}`);
+            },
+            immediate: true, // 立即执行
+            deep: true, // 深度监听
+          },
+        },
+        // watch的方式3 数组
+        // watch: {
+        //   name: [
+        //     {
+        //       handler(newName, oldName) {
+        //         console.log(`Name changed from ${oldName} to ${newName}`);
+        //       },
+        //       immediate: true,
+        //     },
+        //   ],
+        // watch的方式4 字符串
+        // watch: {
+        //   name: "handleNameChange",
+        // },
       });
 
       // 测试自动更新

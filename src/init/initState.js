@@ -3,7 +3,7 @@ import { initData } from "./initData";
 import { initMethods } from "./initMethods";
 import { initWatch } from "./initWatch";
 import { initProps } from "./initProps";
-
+import Watcher from "../observer/watcher";
 /**
  * 初始化Vue实例的状态
  * 这是Vue初始化过程中的核心步骤，负责初始化各种响应式状态
@@ -57,8 +57,15 @@ export function stateMixin(vm) {
   vm.prototype.$nextTick = function (cb) {
     return nextTick(cb);
   };
-  //   vm.prototype.$set = set;
-  //   vm.prototype.$delete = del;
+  vm.prototype.$watch = function (expOrFn, cb, options) {
+    const vm = this;
+    options = options || {};
+    options.user = true; // 标记为用户watcher
+    const watcher = new Watcher(vm, expOrFn, cb, options);
+    if (options.immediate) {
+      cb.call(vm, watcher.value); // 立即执行回调
+    }
+  };
 }
 
 // ============== Vue状态初始化详解 ==============
