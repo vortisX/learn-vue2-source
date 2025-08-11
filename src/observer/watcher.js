@@ -29,18 +29,27 @@ class watcher {
     this.vm = vm; // Vue 实例引用，用于访问组件数据和方法
     this.exprOrfn = updateComponent; // 保存更新函数或表达式
     this.cb = cb; // 数据变化时的回调函数
+    this.user = options.user; // 是否是用户定义的watcher
     this.options = options; // 配置选项
     this.id = id++; // watcher 的唯一标识符，用于去重和调试
     this.deps = []; // 依赖的Dep对象列表，记录这个watcher订阅了哪些响应式属性
     this.depsId = new Set(); // 用于去重的 Set 集合，避免重复收集同一个dep
-
     // 如果传入的是函数，直接作为getter使用
     if (typeof updateComponent === "function") {
       this.getter = updateComponent; // 用于更新视图的函数
+    } else if (typeof updateComponent === "string") {
+      this.getter = () => {
+        let path = updateComponent.split(".");
+        let obj = this.vm;
+        for (let i = 0; i < path.length; i++) {
+          obj = obj[path[i]];
+        }
+        return obj;
+      };
     }
 
     // 立即执行一次，进行初始化和依赖收集
-    this.get();
+    this.value = this.get(); // 触发getter，收集依赖 保存watcher的初始值
   }
 
   /**
@@ -49,7 +58,12 @@ class watcher {
    * update方法将watcher添加到更新队列中，然后在下一个tick中执行run方法
    */
   run() {
-    this.get(); // 重新执行getter，触发重新渲染或重新计算
+    let value = this.get(); // 重新执行getter，触发重新渲染或重新计算
+    let oldValue = this.value;
+    if (this.user) {
+      this.cb && this.cb.call(this.vm, oldValue, value); // 如果有回调函数则执行
+      this.value = value;
+    }
   }
 
   /**
@@ -62,8 +76,9 @@ class watcher {
    */
   get() {
     pushTarget(this); // 将当前 watcher 设置为全局的Dep.target
-    this.getter(); // 执行更新组件的方法，期间会触发响应式属性的getter，从而收集依赖
+    const VALUE = this.getter(); // 执行更新组件的方法，期间会触发响应式属性的getter，从而收集依赖
     popTarget(); // 执行完毕后清除 Dep.target，避免影响其他操作
+    return VALUE;
   }
 
   /**
@@ -126,10 +141,10 @@ export default watcher;
 let queue = []; // 更新队列，存储待更新的watcher
 let has = {}; // 用于去重的对象，记录哪些watcher已经在队列中
 let flushing = false; // 标记是否正在刷新队列，防止重复执行
-
+let value; // 用于存储当前正在处理的watcher
 /**
  * 在下一个事件循环中执行更新队列
- * 
+ *
  * 执行流程：
  * 1. 遍历队列中的所有watcher
  * 2. 调用每个watcher的run方法，触发重新渲染或重新计算
@@ -140,7 +155,9 @@ let flushWatcher = () => {
   // 批量执行所有watcher的更新
   queue.forEach((item) => {
     item.run(); // 执行watcher的更新逻辑（重新渲染/重新计算）
-    item.cb && item.cb(); // 如果有回调函数则执行
+    if (!item.user) {
+      item.cb && item.cb.call(item.vm); // 如果有回调函数则执行
+    }
   });
 
   // 清理队列和标记，为下一次更新做准备
