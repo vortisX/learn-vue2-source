@@ -1,41 +1,79 @@
 /**
  * Vue2虚拟DOM的patch函数 - 核心渲染算法
  * 这是Vue2中最重要的函数之一，负责将虚拟DOM转换为真实DOM
- * 
+ *
  * 工作流程：
  * 1. 接收旧的DOM节点和新的虚拟节点
  * 2. 创建新的DOM元素
  * 3. 替换旧的DOM节点
  * 4. 返回新创建的DOM元素
- * 
+ *
  * 注意：这是简化版本，完整版本需要实现diff算法进行性能优化
- * 
+ *
  * @param {Element} oldVnode - 旧的DOM元素（真实DOM节点）
  * @param {Object} vnode - 新的虚拟节点对象
  * @returns {Element} - 返回新创建的DOM元素
  */
 export function patch(oldVnode, vnode) {
-  // 这里可以实现虚拟DOM的diff算法和真实DOM的更新
-  // 1. 创建新的DOM节点 - 根据虚拟节点创建对应的真实DOM
-  let el = createEl(vnode);
-  
-  // 2. 替换旧的DOM节点 - 将新创建的DOM插入到旧节点的位置
-  // insertBefore：在指定节点之前插入新节点
-  oldVnode.parentNode.insertBefore(el, oldVnode.nextSibling);
-  // removeChild：移除旧的DOM节点
-  oldVnode.parentNode.removeChild(oldVnode);
+  if (oldVnode.nodeType === 1) {
+    // 这里可以实现虚拟DOM的diff算法和真实DOM的更新
+    // 1. 创建新的DOM节点 - 根据虚拟节点创建对应的真实DOM
+    let el = createEl(vnode);
 
-  return el; // 返回新的DOM元素，供后续使用
+    // 2. 替换旧的DOM节点 - 将新创建的DOM插入到旧节点的位置
+    // insertBefore：在指定节点之前插入新节点
+    oldVnode.parentNode.insertBefore(el, oldVnode.nextSibling);
+    // removeChild：移除旧的DOM节点
+    oldVnode.parentNode.removeChild(oldVnode);
+
+    return el; // 返回新的DOM元素，供后续使用
+  } else {
+    if (oldVnode.tag !== vnode.tag) {
+      // 如果标签名不同，说明需要替换整个节点
+      return oldVnode.el.parentNode.replaceChild(createEl(vnode), oldVnode.el);
+    }
+    if (!oldVnode.tag) {
+      if (oldVnode.el.textContent !== vnode.text) {
+        return (oldVnode.el.textContent = vnode.text); // 更新文本节点内容
+      }
+    }
+    let el = (vnode.el = oldVnode.el); // 复用旧的DOM元素
+    updateRpors(vnode, oldVnode.data); // 更新属性
+  }
 }
+function updateRpors(vnode, oldVnode = {}) {
+  let newProps = vnode.data || {};
+  let el = vnode.el; // 获取当前虚拟节点对应的真实DOM元素
 
+  for (let key in newProps) {
+    switch (key) {
+      case "style":
+        for (let styleKey in newProps.style) {
+          el.style[styleKey] = newProps.style[styleKey];
+        }
+        break;
+      case "class":
+        el.className = newProps.class || "";
+        break;
+      default:
+        el.setAttribute(key, newProps[key]);
+    }
+  }
+
+  for (const key in oldVnode) {
+    if (!newProps[key]) {
+      el.removeAttribute(key); // 移除旧的属性
+    }
+  }
+}
 /**
  * 根据虚拟节点创建真实DOM元素的核心函数
  * 这个函数负责将Vue的虚拟DOM对象转换为浏览器可以理解的真实DOM
- * 
+ *
  * 处理两种类型的节点：
  * 1. 元素节点：有tag属性，需要创建HTML元素并处理属性和子节点
  * 2. 文本节点：没有tag属性，只有text内容，创建文本节点
- * 
+ *
  * @param {Object} vnode - 虚拟节点对象
  * @param {string} vnode.tag - 标签名（如'div', 'span'等）
  * @param {Object} vnode.data - 节点的属性数据（如id, class, style等）
@@ -43,7 +81,7 @@ export function patch(oldVnode, vnode) {
  * @param {string} vnode.text - 文本内容（仅文本节点使用）
  * @returns {Element|Text} - 创建的DOM元素或文本节点
  */
-function createEl(vnode) {
+export function createEl(vnode) {
   let { tag, data, children, text } = vnode;
 
   // 判断节点类型：如果有标签名，说明是元素节点
@@ -74,13 +112,13 @@ function createEl(vnode) {
 /**
  * 更新DOM元素的属性
  * 这个函数负责将虚拟节点的属性数据应用到真实DOM元素上
- * 
+ *
  * 支持的属性类型：
  * 1. id属性：直接设置元素的id
  * 2. class属性：设置元素的className
  * 3. style属性：支持对象和字符串两种格式的样式
  * 4. 其他属性：通过setAttribute设置（当前被注释掉）
- * 
+ *
  * @param {Element} el - 要更新属性的DOM元素
  * @param {Object} props - 属性对象，包含要设置的所有属性
  */

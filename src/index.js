@@ -3,6 +3,8 @@ import { initMixin } from "./init/index";
 import { lifecycleMixin } from "./lifecycle";
 import { renderMixin } from "./vnode/index";
 import { stateMixin } from "./init/initState";
+import { compileToFunction } from "./compile/index";
+import { createEl, patch } from "./vnode/patch";
 /**
  * Vue构造函数
  * 这是Vue框架的入口点，所有Vue实例都通过这个构造函数创建
@@ -48,6 +50,76 @@ console.log("initGlobalApi 完成");
 stateMixin(Vue);
 console.log("stateMixin 完成");
 
+// ============== Vue功能测试和演示代码 ==============
+//
+// 以下代码演示了Vue的核心功能：
+// 1. 模板编译：将模板字符串转换为渲染函数
+// 2. 虚拟DOM创建：通过渲染函数生成虚拟节点
+// 3. DOM渲染：将虚拟节点转换为真实DOM
+// 4. 差异对比：通过patch算法更新DOM
+
+// 创建第一个Vue实例用于测试
+// 这个实例包含基础的响应式数据
+let vm1 = new Vue({
+  data: {
+    name: "张三", // 姓名数据
+    age: 99,     // 年龄数据
+  },
+});
+
+// 编译第一个模板字符串
+// compileToFunction将模板转换为可执行的渲染函数
+// 模板中的{{name}}和{{age}}会被替换为对应的数据值
+let render1 = compileToFunction(
+  `<div id="a">我的名字叫{{name}},我的年龄是{{age}}岁。</div>`
+);
+
+// 执行渲染函数生成虚拟DOM节点
+// render1.call(vm1)在vm1的上下文中执行渲染函数
+// 这样模板中的变量可以正确访问到vm1的data
+let vnode1 = render1.call(vm1);
+
+// 将虚拟DOM转换为真实DOM并添加到页面
+// createEl函数递归处理虚拟节点，创建对应的DOM元素
+document.body.appendChild(createEl(vnode1));
+
+// 创建第二个Vue实例用于对比测试
+// 这个实例有相同的数据结构但不同的值和样式
+let vm2 = new Vue({
+  data: {
+    name: "李四", // 不同的姓名
+    age: 99,     // 相同的年龄
+  },
+});
+
+// 编译第二个模板字符串
+// 这个模板添加了style属性，用于测试属性的差异更新
+let render2 = compileToFunction(
+  `<div style="color:red">我的名字叫{{name}},我的年龄是{{age}}岁。</div>`
+);
+
+// 执行第二个渲染函数生成新的虚拟DOM
+let vnode2 = render2.call(vm2);
+
+// 将第二个虚拟DOM也渲染到页面
+// 此时页面上会有两个div元素
+document.body.appendChild(createEl(vnode2));
+
+// ============== Virtual DOM Patch 算法演示 ==============
+//
+// patch函数是Vue虚拟DOM的核心，负责：
+// 1. 比较新旧虚拟节点的差异
+// 2. 最小化DOM操作，只更新有变化的部分
+// 3. 保持DOM结构的稳定性
+//
+// patch算法的优势：
+// - 性能优化：避免不必要的DOM操作
+// - 差异检测：精确识别需要更新的部分
+// - 批量更新：将多个变化合并处理
+//
+// 这里演示的是将vnode1更新为vnode2的过程
+patch(vnode1, vnode2);
+
 export default Vue;
 
 // ============== Vue架构设计说明 ==============
@@ -75,3 +147,13 @@ export default Vue;
 //    - 帮助开发者了解Vue的加载过程
 //    - 便于调试和问题排查
 //    - 显示各个模块的加载状态
+//
+// 6. 虚拟DOM的工作流程：
+//    模板字符串 -> 编译 -> 渲染函数 -> 虚拟DOM -> 真实DOM
+//    数据变化 -> 重新渲染 -> 新虚拟DOM -> patch对比 -> 更新真实DOM
+//
+// 7. 响应式系统的集成：
+//    - 数据劫持：通过Object.defineProperty监听数据变化
+//    - 依赖收集：在渲染过程中收集数据依赖
+//    - 变化通知：数据变化时通知相关的watcher
+//    - 批量更新：使用nextTick机制批量处理DOM更新
